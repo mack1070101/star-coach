@@ -1,0 +1,39 @@
+* Situation: 3m
+
+- I was working as a software engineer at a startup that was rapidly growing
+- Our team was responsible for maintaining a critical customer-facing application
+- We were experiencing frequent outages and performance issues
+- Customer complaints were increasing and our reputation was at stake
+- The CEO made it clear this was a top priority that needed immediate attention
+
+* Task: 2m
+
+- I was tasked with leading the effort to stabilize the application
+- My responsibilities included:
+  - Identifying the root causes of the performance issues
+  - Coordinating with the DevOps team to implement monitoring
+  - Working with the product team to prioritize critical fixes
+  - Creating a plan to prevent future outages
+- I had to balance immediate firefighting with long-term architectural improvements
+
+* Action: 4m
+
+- I started by conducting a thorough analysis of our system architecture
+- I implemented comprehensive logging and monitoring using tools like New Relic
+- I created a detailed incident response playbook for the team
+- I worked with the DevOps team to set up automated alerts and health checks
+- I identified and fixed several critical bottlenecks in our database queries
+- I implemented caching strategies to reduce load on our servers
+- I established a weekly performance review meeting with stakeholders
+- I created a knowledge base documenting common issues and solutions
+- I trained the team on the new monitoring tools and response procedures
+
+* Result: 2m
+
+- We reduced our average response time from 3 seconds to 300ms
+- The number of outages decreased by 80% within the first quarter
+- Customer satisfaction scores improved from 6.5 to 8.8 out of 10
+- We were able to handle 3x more traffic without performance degradation
+- The CEO publicly recognized our team's efforts in the company all-hands
+- We established a culture of proactive monitoring and performance optimization
+- The playbook I created became a template for other teams in the company 

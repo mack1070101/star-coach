@@ -1,0 +1,76 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+          
+      - name: Build package
+        run: python -m build
+        
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/*
+            star_coach_standalone.py
+            example_star.org
+          body: |
+            ## 🌟 STAR Coach v${{ github.ref_name }}
+            
+            ### What's New
+            - CLI tool for practicing STAR interview answers
+            - Timed sections with progress bars
+            - Support for .org and .txt files
+            - Standalone version with no dependencies
+            
+            ### Installation
+            
+                         **Homebrew:**
+             ```bash
+             brew install mack1070101/star-coach/star-coach
+             ```
+             
+             **Direct download:**
+             ```bash
+             # Download standalone script
+             curl -O https://github.com/mack1070101/star-coach/releases/latest/download/star_coach_standalone.py
+             python star_coach_standalone.py --file example.org
+             ```
+            
+            **Pip:**
+            ```bash
+            pip install star-coach
+            star-coach --file example.org
+            ```
+            
+            ### Usage
+            ```bash
+            # Practice with default sections
+            star-coach
+            
+            # Practice with custom file
+            star-coach --file example.org
+            
+            # Standalone version
+            star-coach-standalone --file example.org
+            ```
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
