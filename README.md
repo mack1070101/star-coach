@@ -72,12 +72,17 @@ When `prompt_toolkit` is available, you get:
 
 - **Full-screen interface** with rich formatting
 - **Real-time progress bars** with smooth animations
-- **Keyboard shortcuts**:
-  - `q` - Quit the current section
-  - `space` - Pause/resume (planned feature)
+- **Interactive Controls**:
+  - **↑ Up Arrow**: Restart the current section
+  - **↓ Down Arrow**: Quit/skip the current section
+  - **← Left Arrow**: Skip back 5 seconds
+  - **→ Right Arrow**: Skip forward 5 seconds
+  - **Space**: Pause/resume the timer
+  - **Q**: Quit the entire application
 - **Color-coded sections** and content
 - **Responsive layout** that adapts to terminal size
 - **Mouse support** for interactive elements
+- **Live status display** showing pause state and time remaining
 
 ## 📝 File Format
 
@@ -159,14 +164,21 @@ When you run STAR Coach with the enhanced interface, you'll see:
 
 ```
 🌟 STAR Coach - Enhanced Interview Practice Tool
-Get ready to practice your STAR answers with rich interface!
+Get ready to practice your STAR answers with rich interface and controls!
 
 📁 Loaded content from: example_star.org
 📊 Found 4 sections to practice
-🎨 Using enhanced interface with prompt_toolkit
+🎨 Using enhanced interface with prompt_toolkit and user controls
 
-[Full-screen interface with rich formatting, progress bars, and controls]
+[Full-screen interface with rich formatting, progress bars, and interactive controls]
 ```
+
+The interface provides:
+- **Section content display** with clear formatting
+- **Progress bar** showing completion percentage
+- **Control instructions** with arrow key mappings
+- **Live timer** with minutes:seconds remaining
+- **Status indicator** showing if timer is paused or running
 
 ## 🎯 Use Cases
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 STAR Coach - Enhanced CLI tool for practicing STAR interview answers with timed sections.
-Uses prompt_toolkit for rich interactive experience.
+Uses prompt_toolkit for rich interactive experience with user controls.
 """
 
 import argparse
@@ -18,7 +18,7 @@ try:
     from prompt_toolkit.layout.containers import FloatContainer, Float
     from prompt_toolkit.key_binding import KeyBindings
     from prompt_toolkit.formatted_text import HTML, FormattedText
-    from prompt_toolkit.widgets import ProgressBar, Label, Button
+    from prompt_toolkit.widgets import Label, Button
     from prompt_toolkit.styles import Style
     from prompt_toolkit.layout.dimension import D
     PROMPT_TOOLKIT_AVAILABLE = True
@@ -118,67 +118,119 @@ def parse_star_file(file_path: Optional[Path]) -> List[STARSection]:
 
 
 def create_progress_bar_app(section: STARSection, section_num: int, total_sections: int):
-    """Create a prompt_toolkit application with progress bar."""
+    """Create a prompt_toolkit application with progress bar and user controls."""
     
     # Create key bindings
     kb = KeyBindings()
     
-    # Progress tracking
+    # Progress tracking with control variables
     progress = [0]  # Use list to allow modification in nested functions
+    paused = [False]
+    quit_section = [False]
+    restart_section = [False]
+    quit_app = [False]
     
     def update_progress():
-        if progress[0] < section.time_seconds:
+        if not paused[0] and progress[0] < section.time_seconds:
             progress[0] += 1
             return True
         return False
     
     @kb.add('q')
-    def quit_app(event):
-        """Quit the application."""
+    @kb.add('Q')
+    def quit_app_handler(event):
+        """Quit the entire application."""
+        quit_app[0] = True
         event.app.exit()
     
+    @kb.add('up')
+    def restart_section_handler(event):
+        """Restart the current section."""
+        restart_section[0] = True
+        event.app.exit()
+    
+    @kb.add('down')
+    def quit_section_handler(event):
+        """Quit the current section."""
+        quit_section[0] = True
+        event.app.exit()
+    
+    @kb.add('left')
+    def skip_back_handler(event):
+        """Skip back 5 seconds."""
+        progress[0] = max(0, progress[0] - 5)
+        event.app.invalidate()
+    
+    @kb.add('right')
+    def skip_forward_handler(event):
+        """Skip forward 5 seconds."""
+        progress[0] = min(section.time_seconds, progress[0] + 5)
+        event.app.invalidate()
+    
     @kb.add('space')
-    def pause_resume(event):
+    def pause_resume_handler(event):
         """Pause/resume the timer."""
-        # This could be enhanced with pause functionality
-        pass
+        paused[0] = not paused[0]
+        event.app.invalidate()
     
     # Create progress bar
-    progress_bar = ProgressBar()
+    def get_progress_text():
+        percentage = int((progress[0] / section.time_seconds) * 100)
+        filled = int(50 * progress[0] / section.time_seconds)
+        bar = "█" * filled + "░" * (50 - filled)
+        
+        # Calculate elapsed and remaining time
+        elapsed_minutes = progress[0] // 60
+        elapsed_seconds = progress[0] % 60
+        remaining_minutes = (section.time_seconds - progress[0]) // 60
+        remaining_seconds = (section.time_seconds - progress[0]) % 60
+        
+        # Show "paused" instead of "elapsed" when paused
+        time_label = "Paused" if paused[0] else "Elapsed"
+        
+        return f"[{bar}] {percentage}% | {time_label}: {elapsed_minutes:02d}:{elapsed_seconds:02d} | Remaining: {remaining_minutes:02d}:{remaining_seconds:02d}"
     
-    # Create content display
-    content_text = section.content if section.content else f"[No content provided for {section.name}]"
-    content_display = FormattedTextControl(
-        HTML(f"""
+    progress_display = FormattedTextControl(HTML(f"<ansigreen>{get_progress_text()}</ansigreen>"))
+    
+    # Always show section title and time
+    section_title_html = f"""
 <ansiblue>📋 {section.name.upper()}</ansiblue>
+<ansigreen>⏱️  Time: {section.time_minutes} minute{'s' if section.time_minutes != 1 else ''}</ansigreen>
+    """
+    if section.content:
+        content_html = f"""
+{section_title_html}
 
 <ansiyellow>Content:</ansiyellow>
-{content_text}
-
-<ansigreen>⏱️  Time: {section.time_minutes} minute{'s' if section.time_minutes != 1 else ''}</ansigreen>
-        """)
-    )
+{section.content}
+        """
+        content_height = D(min=8, weight=1)
+    else:
+        content_html = section_title_html
+        content_height = D.exact(2)
+    content_display = FormattedTextControl(HTML(content_html))
     
-    # Create status display
-    status_display = FormattedTextControl(
-        HTML(f"<ansicyan>Section {section_num} of {total_sections}</ansicyan>")
-    )
+    # Create controls display
+    def get_controls_text():
+        return f"""
+<ansiyellow>Controls:</ansiyellow>
+<ansigreen>↑</ansigreen> Restart Section  <ansigreen>↓</ansigreen> Quit Section
+<ansigreen>←</ansigreen> Skip Back 5s     <ansigreen>→</ansigreen> Skip Forward 5s
+<ansigreen>Space</ansigreen> Pause/Resume  <ansired>Q</ansired> Quit App
+        """
     
-    # Create instructions
-    instructions = FormattedTextControl(
-        HTML("<ansiyellow>Press 'q' to quit, 'space' to pause/resume</ansiyellow>")
-    )
+    controls_display = FormattedTextControl(HTML(get_controls_text()))
     
-    # Layout
+    # Layout with dynamic sizing, no status line
     root_container = FloatContainer(
         content=HSplit([
-            Window(content=status_display, height=1),
+            # Window(content=status_display, height=1),  # Removed status line
+            # Window(height=1),  # Removed spacer for status
+            Window(content=content_display, height=content_height),  # Dynamic height
             Window(height=1),  # Spacer
-            Window(content=content_display, height=D(min=10)),
+            Window(content=progress_display, height=3),
             Window(height=1),  # Spacer
-            Window(content=progress_bar, height=3),
-            Window(height=1),  # Spacer
-            Window(content=instructions, height=1),
+            Window(content=controls_display, height=D(min=6, weight=1)),  # Dynamic height
         ]),
         floats=[
             Float(
@@ -213,23 +265,27 @@ def create_progress_bar_app(section: STARSection, section_num: int, total_sectio
     
     # Start timer
     def run_timer():
-        while progress[0] < section.time_seconds:
+        while progress[0] < section.time_seconds and not quit_section[0] and not restart_section[0] and not quit_app[0]:
             time.sleep(1)
-            update_progress()
-            # Update progress bar
-            progress_bar.percentage = (progress[0] / section.time_seconds) * 100
+            if not paused[0]:
+                update_progress()
+            # Update progress bar and controls
+            progress_display.text = HTML(f"<ansigreen>{get_progress_text()}</ansigreen>")
+            controls_display.text = HTML(get_controls_text())
             app.invalidate()
-        app.exit()
+        # Only call app.exit() if the app is still running
+        if app.is_running:
+            app.exit()
     
     import threading
     timer_thread = threading.Thread(target=run_timer)
     timer_thread.daemon = True
     timer_thread.start()
     
-    return app
+    return app, quit_section, restart_section, quit_app
 
 
-def display_section_enhanced(section: STARSection, section_num: int, total_sections: int) -> None:
+def display_section_enhanced(section: STARSection, section_num: int, total_sections: int) -> tuple[bool, bool, bool]:
     """
     Display a STAR section with enhanced prompt_toolkit interface.
     
@@ -237,26 +293,46 @@ def display_section_enhanced(section: STARSection, section_num: int, total_secti
         section: The STAR section to display
         section_num: Current section number
         total_sections: Total number of sections
+        
+    Returns:
+        tuple: (quit_section, restart_section, quit_app)
     """
     if not PROMPT_TOOLKIT_AVAILABLE:
         # Fallback to basic display
         display_section_basic(section, section_num, total_sections)
-        return
+        return False, False, False
     
     try:
-        app = create_progress_bar_app(section, section_num, total_sections)
+        app, quit_section, restart_section, quit_app = create_progress_bar_app(section, section_num, total_sections)
         app.run()
         
-        # Show completion message
-        print(f"\n✅ {section.name} section complete!")
+        # Check if section was quit or restarted
+        was_quit = quit_section[0]
+        was_restart = restart_section[0]
+        was_app_quit = quit_app[0]
+        
+        if was_app_quit:
+            print(f"\n👋 Application quit by user!")
+            return False, False, True
+        elif was_quit:
+            print(f"\n⏭️  {section.name} section skipped!")
+        elif was_restart:
+            print(f"\n🔄 {section.name} section restarted!")
+            # Recursively restart the section
+            return display_section_enhanced(section, section_num, total_sections)
+        else:
+            print(f"\n✅ {section.name} section complete!")
+        
+        return was_quit, was_restart, was_app_quit
         
     except Exception as e:
         print(f"Error with enhanced display: {e}")
         # Fallback to basic display
         display_section_basic(section, section_num, total_sections)
+        return False, False, False
 
 
-def display_section_basic(section: STARSection, section_num: int, total_sections: int) -> None:
+def display_section_basic(section: STARSection, section_num: int, total_sections: int) -> tuple[bool, bool, bool]:
     """
     Basic display fallback when prompt_toolkit is not available.
     
@@ -264,6 +340,9 @@ def display_section_basic(section: STARSection, section_num: int, total_sections
         section: The STAR section to display
         section_num: Current section number
         total_sections: Total number of sections
+        
+    Returns:
+        tuple: (quit_section, restart_section, quit_app) - always False for basic mode
     """
     print(f"\nSection {section_num} of {total_sections}")
     print(f"📋 {section.name.upper()}")
@@ -279,6 +358,7 @@ def display_section_basic(section: STARSection, section_num: int, total_sections
     print()
     
     print(f"Practice {section.name}...")
+    print("Controls: Press Ctrl+C to quit")
     
     # Create progress bar
     for i in range(section.time_seconds + 1):
@@ -294,6 +374,7 @@ def display_section_basic(section: STARSection, section_num: int, total_sections
     
     print()  # New line after progress
     print(f"✅ {section.name} section complete!")
+    return False, False, False
 
 
 def progress_bar_basic(current: int, total: int, width: int = 50) -> str:
@@ -308,7 +389,7 @@ def print_banner():
     """Print the application banner."""
     if PROMPT_TOOLKIT_AVAILABLE:
         print("🌟 STAR Coach - Enhanced Interview Practice Tool")
-        print("Get ready to practice your STAR answers with rich interface!\n")
+        print("Get ready to practice your STAR answers with rich interface and controls!\n")
     else:
         print("🌟 STAR Coach - Interview Practice Tool")
         print("Get ready to practice your STAR answers!\n")
@@ -351,7 +432,7 @@ def main():
         print(f"📊 Found {len(sections)} sections to practice")
         
         if PROMPT_TOOLKIT_AVAILABLE:
-            print("🎨 Using enhanced interface with prompt_toolkit")
+            print("🎨 Using enhanced interface with prompt_toolkit and user controls")
         else:
             print("📱 Using basic interface")
         
@@ -359,7 +440,20 @@ def main():
         
         # Practice each section
         for i, section in enumerate(sections, 1):
-            display_section_enhanced(section, i, len(sections))
+            quit_section, restart_section, quit_app = display_section_enhanced(section, i, len(sections))
+            
+            # If app was quit, exit the loop
+            if quit_app:
+                break
+            
+            # If section was quit, skip to next
+            if quit_section:
+                continue
+            
+            # If section was restarted, don't advance to next section
+            if restart_section:
+                i -= 1  # Stay on current section
+                continue
             
             if i < len(sections):
                 if PROMPT_TOOLKIT_AVAILABLE:
