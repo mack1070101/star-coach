@@ -2,7 +2,7 @@ class StarCoach < Formula
   desc "CLI tool for practicing STAR interview answers with timed sections"
   homepage "https://github.com/mack1070101/star-coach"
   url "https://github.com/mack1070101/star-coach/archive/refs/tags/v0.1.0.tar.gz"
-  sha256 "PLACEHOLDER_SHA256" # Replace with actual SHA256 when you create a release
+  sha256 "47333e8982f5c8cff8d3cd1199317a2e0d92e98e59f2a33a3f3f7e4e89d429ad"
   license "MIT"
   head "https://github.com/mack1070101/star-coach.git", branch: "main"
   
