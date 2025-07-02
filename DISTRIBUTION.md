@@ -35,13 +35,9 @@ brew tap mack1070101/star-coach
 brew install star-coach
 ```
 
-## 🔄 Automated Releases
+## 🔄 Manual Releases
 
-The `.github/workflows/release.yml` file will automatically:
-
-1. **Build the package** when you push a tag
-2. **Create a GitHub release** with assets
-3. **Upload to PyPI** (if configured)
+Since we're using the standalone approach, releases are simple:
 
 ### To Create a Release:
 
@@ -51,22 +47,31 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
+### Manual Release Steps:
+
+1. **Go to GitHub repository**
+2. **Click "Releases" → "Draft a new release"**
+3. **Tag:** `v0.1.0`
+4. **Title:** `v0.1.0`
+5. **Description:** Add release notes
+6. **Attach files:**
+   - `star_coach_standalone.py`
+   - `example_star.org`
+7. **Click "Publish release"**
+
 ## 📋 Distribution Checklist
 
 ### Before First Release:
 
-- [ ] **Update version** in `star_coach/__init__.py`
-- [ ] **Update version** in `pyproject.toml`
-- [ ] **Update version** in Homebrew formula
-- [ ] **Test installation** locally
+- [ ] **Update version** in `star_coach_standalone.py` (if needed)
+- [ ] **Test locally** with `python star_coach_standalone.py`
 - [ ] **Create GitHub repository**
 - [ ] **Push code** to GitHub
 - [ ] **Create release** with tag
 
 ### For Each Release:
 
-- [ ] **Update version numbers**
-- [ ] **Test locally** with `pip install -e .`
+- [ ] **Test locally** with `python star_coach_standalone.py`
 - [ ] **Create and push tag**
 - [ ] **Update Homebrew formula SHA256**
 - [ ] **Test Homebrew installation**
@@ -81,20 +86,19 @@ brew install --build-from-source ./homebrew-tap/star-coach.rb
 
 # Test the installation
 star-coach --help
-star-coach-standalone --help
 ```
 
-### Test Package Installation:
+### Test Standalone Script:
 
 ```bash
-# Build package
-python -m build
+# Test basic functionality
+python star_coach_standalone.py --help
 
-# Install from wheel
-pip install dist/star_coach-0.1.0-py3-none-any.whl
+# Test with example file
+python star_coach_standalone.py --file example_star.org
 
-# Test
-star-coach --help
+# Test with no file (default sections)
+python star_coach_standalone.py
 ```
 
 ## 📊 Distribution Methods Summary
@@ -102,16 +106,15 @@ star-coach --help
 | Method | Command | Pros | Cons |
 |--------|---------|------|------|
 | **Homebrew** | `brew install mack1070101/star-coach/star-coach` | Easy for macOS users, professional | macOS only |
-| **PyPI** | `pip install star-coach` | Cross-platform, standard | Requires Python |
-| **Standalone** | Download script | No dependencies, simple | Manual download |
-| **GitHub Release** | Download assets | Direct, no package manager | Manual installation |
+| **Direct Download** | `curl -O https://raw.githubusercontent.com/mack1070101/star-coach/main/star_coach_standalone.py` | No dependencies, simple | Manual download |
+| **GitHub Release** | Download from releases page | Direct, no package manager | Manual installation |
+| **Git Clone** | `git clone https://github.com/mack1070101/star-coach.git` | Full source, version control | Requires git |
 
 ## 🎯 Recommended Workflow
 
 1. **Start with GitHub releases** (easiest)
 2. **Add Homebrew tap** (for macOS users)
-3. **Publish to PyPI** (for Python users)
-4. **Consider other package managers** (Chocolatey, Snap, etc.)
+3. **Consider other package managers** (Chocolatey, Snap, etc.)
 
 ## 🔧 Troubleshooting
 
@@ -122,19 +125,27 @@ star-coach --help
 - Ensure release URL is correct
 - Verify Python dependency
 
-**PyPI upload fails:**
-- Check package name availability
-- Verify build artifacts
-- Test locally first
-
 **Standalone script issues:**
 - Ensure Python 3.8+ is available
 - Check file permissions
 - Test with different Python versions
+
+**File not found errors:**
+- Verify the script is in the correct location
+- Check file permissions (`chmod +x star_coach_standalone.py`)
 
 ## 📞 Support
 
 For distribution issues:
 - Check GitHub Issues
 - Review Homebrew documentation
-- Test with clean environments 
+- Test with clean environments
+
+## 🎉 Benefits of Standalone Approach
+
+✅ **No dependencies** - Uses only Python standard library  
+✅ **Simple distribution** - Single file to share  
+✅ **Easy installation** - Just download and run  
+✅ **Cross-platform** - Works on any system with Python  
+✅ **No build process** - No complex packaging required  
+✅ **Version control friendly** - Easy to track changes 

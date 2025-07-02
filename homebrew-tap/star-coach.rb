@@ -9,19 +9,16 @@ class StarCoach < Formula
   depends_on "python@3.8"
   
   def install
-    # Install the Python package
-    system "python3", "-m", "pip", "install", *std_pip_args, "."
+    # Install the standalone script
+    bin.install "star_coach_standalone.py" => "star-coach"
     
-    # Also install the standalone script as a backup option
-    bin.install "star_coach_standalone.py" => "star-coach-standalone"
+    # Make it executable
+    chmod 0755, bin/"star-coach"
   end
   
   test do
-    # Test the main CLI
-    system "#{bin}/star-coach", "--help"
-    
     # Test the standalone version
-    system "#{bin}/star-coach-standalone", "--help"
+    system "#{bin}/star-coach", "--help"
   end
   
   def caveats
@@ -30,14 +27,14 @@ class StarCoach < Formula
       
       You can now use:
       
-      # Main CLI (with beautiful progress bars)
-      star-coach --file example.org
-      
-      # Standalone version (no external dependencies)
-      star-coach-standalone --file example.org
-      
       # Practice with default empty sections
       star-coach
+      
+      # Practice with custom file
+      star-coach --file example.org
+      
+      # Practice with the included example
+      star-coach --file example_star.org
       
       For more information and examples, visit: #{homepage}
     EOS

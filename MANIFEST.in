@@ -1,8 +1,0 @@
-include README.md
-include LICENSE
-include requirements.txt
-include requirements-dev.txt
-include example_star.org
-include pyproject.toml
-recursive-include star_coach *.py
-recursive-include star_coach/tests *.py 

@@ -5,30 +5,38 @@ A CLI tool that helps job candidates practice giving STAR answers (Situation, Ta
 ## ✨ Features
 
 - **Timed Practice Sessions**: Each STAR section has configurable timing
-- **Beautiful CLI Interface**: Rich progress bars and formatted output
+- **Beautiful CLI Interface**: Progress bars and formatted output
 - **Flexible Input**: Works with `.org` or `.txt` files
 - **Default Fallbacks**: Uses sensible defaults when no file is provided
 - **Real-time Progress**: Live progress bars that update every second
+- **No Dependencies**: Uses only Python standard library
 
 ## 🚀 Quick Start
 
 ### Installation
 
-1. **Clone the repository:**
-   ```bash
-   git clone <repository-url>
-   cd star-coach
-   ```
+**Option 1: Homebrew (macOS)**
+```bash
+brew tap mack1070101/star-coach
+brew install star-coach
+```
 
-2. **Install with pip:**
-   ```bash
-   pip install -e .
-   ```
+**Option 2: Direct Download**
+```bash
+# Download the standalone script
+curl -O https://raw.githubusercontent.com/mack1070101/star-coach/main/star_coach_standalone.py
+chmod +x star_coach_standalone.py
 
-   Or install in development mode with all dependencies:
-   ```bash
-   pip install -e ".[dev]"
-   ```
+# Run it
+python star_coach_standalone.py
+```
+
+**Option 3: Clone Repository**
+```bash
+git clone https://github.com/mack1070101/star-coach.git
+cd star-coach
+python star_coach_standalone.py
+```
 
 ### Basic Usage
 
@@ -81,39 +89,34 @@ STAR Coach reads `.org` or `.txt` files with the following format:
 
 ## 🛠️ Development
 
-### Setup Development Environment
-
-1. **Install development dependencies:**
-   ```bash
-   pip install -e ".[dev]"
-   ```
-
-2. **Run tests:**
-   ```bash
-   pytest
-   ```
-
-3. **Format code:**
-   ```bash
-   black .
-   isort .
-   ```
-
-4. **Type checking:**
-   ```bash
-   mypy star_coach/
-   ```
-
 ### Project Structure
 
 ```
-star_coach/
-├── __init__.py          # Package initialization
-├── cli.py              # Main CLI application
-└── tests/
-    ├── __init__.py     # Tests package
-    └── test_parse.py   # Parsing tests
+star-coach/
+├── star_coach_standalone.py  # Main CLI application
+├── example_star.org          # Example STAR practice file
+├── README.md                 # This file
+└── homebrew-tap/            # Homebrew distribution files
+    └── star-coach.rb        # Homebrew formula
 ```
+
+### Local Development
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/mack1070101/star-coach.git
+   cd star-coach
+   ```
+
+2. **Run the script:**
+   ```bash
+   python star_coach_standalone.py --help
+   ```
+
+3. **Test with example file:**
+   ```bash
+   python star_coach_standalone.py --file example_star.org
+   ```
 
 ## 📋 Example Session
 
@@ -129,14 +132,14 @@ Get ready to practice your STAR answers!
 Section 1 of 4
 
 📋 SITUATION
-┌─ Situation Content ──────────────────────────────────────┐
-│ - I was working as a software engineer at a startup...   │
-│ - Our team was responsible for maintaining...            │
-└──────────────────────────────────────────────────────────┘
+────────────────────────────────────────────────────────────
+- I was working as a software engineer at a startup...
+────────────────────────────────────────────────────────────
 
 ⏱️  Time: 3 minutes
 
-⠋ Practice Situation... 45% ⏱️ 1:21
+Practice Situation...
+[████████████████████████████████████████████████████] 100% ⏱️ 00:00 remaining
 ✅ Situation section complete!
 
 Press Enter to continue to the next section...
@@ -163,9 +166,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Built with [Typer](https://typer.tiangolo.com/) for CLI functionality
-- Beautiful output powered by [Rich](https://rich.readthedocs.io/)
-- Testing with [pytest](https://pytest.org/)
+- Built with Python standard library for maximum compatibility
+- Beautiful CLI output with progress bars and formatting
+- Simple and focused design for interview practice
 
 ---
 
