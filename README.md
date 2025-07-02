@@ -5,37 +5,48 @@ A CLI tool that helps job candidates practice giving STAR answers (Situation, Ta
 ## ✨ Features
 
 - **Timed Practice Sessions**: Each STAR section has configurable timing
-- **Beautiful CLI Interface**: Progress bars and formatted output
+- **Enhanced CLI Interface**: Rich interactive interface with prompt_toolkit
 - **Flexible Input**: Works with `.org` or `.txt` files
 - **Default Fallbacks**: Uses sensible defaults when no file is provided
 - **Real-time Progress**: Live progress bars that update every second
-- **No Dependencies**: Uses only Python standard library
+- **Graceful Fallback**: Works with or without prompt_toolkit
+- **Interactive Controls**: Keyboard shortcuts for pause/resume/quit
 
 ## 🚀 Quick Start
 
 ### Installation
 
-**Option 1: Homebrew (macOS)**
+**Option 1: Homebrew (macOS) - Enhanced Version**
 ```bash
 brew tap mack1070101/star-coach
 brew install star-coach
 ```
 
-**Option 2: Direct Download**
+**Option 2: Direct Download - Enhanced Version**
 ```bash
 # Download the standalone script
 curl -O https://raw.githubusercontent.com/mack1070101/star-coach/main/star_coach_standalone.py
-chmod +x star_coach_standalone.py
+
+# Install prompt_toolkit for enhanced interface
+pip install prompt_toolkit
 
 # Run it
 python star_coach_standalone.py
 ```
 
-**Option 3: Clone Repository**
+**Option 3: Clone Repository - Enhanced Version**
 ```bash
 git clone https://github.com/mack1070101/star-coach.git
 cd star-coach
+pip install prompt_toolkit
 python star_coach_standalone.py
+```
+
+**Option 4: Basic Version (No Dependencies)**
+```bash
+# Download and run without prompt_toolkit
+curl -O https://raw.githubusercontent.com/mack1070101/star-coach/main/star_coach_standalone.py
+python star_coach_standalone.py --basic
 ```
 
 ### Basic Usage
@@ -50,10 +61,23 @@ star-coach
 star-coach --file example_star.org
 ```
 
-**Or use the short flag:**
+**Force basic interface (no prompt_toolkit):**
 ```bash
-star-coach -f example_star.org
+star-coach --basic
 ```
+
+## 🎨 Enhanced Interface Features
+
+When `prompt_toolkit` is available, you get:
+
+- **Full-screen interface** with rich formatting
+- **Real-time progress bars** with smooth animations
+- **Keyboard shortcuts**:
+  - `q` - Quit the current section
+  - `space` - Pause/resume (planned feature)
+- **Color-coded sections** and content
+- **Responsive layout** that adapts to terminal size
+- **Mouse support** for interactive elements
 
 ## 📝 File Format
 
@@ -93,8 +117,9 @@ STAR Coach reads `.org` or `.txt` files with the following format:
 
 ```
 star-coach/
-├── star_coach_standalone.py  # Main CLI application
+├── star_coach_standalone.py  # Main CLI application (enhanced)
 ├── example_star.org          # Example STAR practice file
+├── requirements.txt          # Dependencies for enhanced version
 ├── README.md                 # This file
 └── homebrew-tap/            # Homebrew distribution files
     └── star-coach.rb        # Homebrew formula
@@ -108,41 +133,39 @@ star-coach/
    cd star-coach
    ```
 
-2. **Run the script:**
+2. **Install dependencies for enhanced version:**
+   ```bash
+   pip install prompt_toolkit
+   ```
+
+3. **Run the script:**
    ```bash
    python star_coach_standalone.py --help
    ```
 
-3. **Test with example file:**
+4. **Test with example file:**
    ```bash
    python star_coach_standalone.py --file example_star.org
    ```
 
+5. **Test basic version:**
+   ```bash
+   python star_coach_standalone.py --basic --file example_star.org
+   ```
+
 ## 📋 Example Session
 
-When you run STAR Coach, you'll see output like this:
+When you run STAR Coach with the enhanced interface, you'll see:
 
 ```
-🌟 STAR Coach - Interview Practice Tool
-Get ready to practice your STAR answers!
+🌟 STAR Coach - Enhanced Interview Practice Tool
+Get ready to practice your STAR answers with rich interface!
 
 📁 Loaded content from: example_star.org
 📊 Found 4 sections to practice
+🎨 Using enhanced interface with prompt_toolkit
 
-Section 1 of 4
-
-📋 SITUATION
-────────────────────────────────────────────────────────────
-- I was working as a software engineer at a startup...
-────────────────────────────────────────────────────────────
-
-⏱️  Time: 3 minutes
-
-Practice Situation...
-[████████████████████████████████████████████████████] 100% ⏱️ 00:00 remaining
-✅ Situation section complete!
-
-Press Enter to continue to the next section...
+[Full-screen interface with rich formatting, progress bars, and controls]
 ```
 
 ## 🎯 Use Cases
@@ -166,8 +189,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Built with Python standard library for maximum compatibility
-- Beautiful CLI output with progress bars and formatting
+- Enhanced with [prompt_toolkit](https://python-prompt-toolkit.readthedocs.io/) for rich CLI experience
+- Graceful fallback to basic interface when dependencies aren't available
+- Beautiful progress bars and interactive controls
 - Simple and focused design for interview practice
 
 ---

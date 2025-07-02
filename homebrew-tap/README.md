@@ -1,6 +1,6 @@
 # Homebrew Tap for STAR Coach
 
-This is a Homebrew tap for the STAR Coach CLI tool - a standalone Python script for practicing STAR interview answers.
+This is a Homebrew tap for the STAR Coach CLI tool - an enhanced Python script for practicing STAR interview answers with rich interactive interface.
 
 ## Installation
 
@@ -8,7 +8,7 @@ This is a Homebrew tap for the STAR Coach CLI tool - a standalone Python script 
 # Add the tap
 brew tap mack1070101/star-coach
 
-# Install STAR Coach
+# Install STAR Coach (includes prompt_toolkit for enhanced interface)
 brew install star-coach
 ```
 
@@ -17,7 +17,7 @@ brew install star-coach
 After installation, you can use:
 
 ```bash
-# Practice with default empty sections
+# Practice with enhanced interface (default)
 star-coach
 
 # Practice with custom file
@@ -25,22 +25,30 @@ star-coach --file example.org
 
 # Practice with the included example
 star-coach --file example_star.org
+
+# Force basic interface (no prompt_toolkit)
+star-coach --basic
 ```
 
 ## What's Included
 
-- **star-coach**: Standalone Python script with no external dependencies
-- **Beautiful progress bars** and timed sections
+- **star-coach**: Enhanced Python script with prompt_toolkit for rich interface
+- **Beautiful progress bars** and timed sections with smooth animations
+- **Full-screen interface** with color-coded sections
+- **Keyboard shortcuts** for interactive control
+- **Graceful fallback** to basic interface when needed
 - **Support for .org and .txt files** with custom timing
 - **Real-time countdown** for each STAR section
 
-## Features
+## Enhanced Features
 
-- ✅ **No dependencies** - Uses only Python standard library
-- ✅ **Timed practice sessions** - Configurable timing per section
-- ✅ **File support** - Works with .org and .txt files
-- ✅ **Default fallbacks** - Sensible defaults when no file provided
-- ✅ **Cross-platform** - Works on any system with Python 3.8+
+- ✅ **Rich interactive interface** - Full-screen with prompt_toolkit
+- ✅ **Smooth progress bars** - Real-time animations
+- ✅ **Keyboard shortcuts** - `q` to quit, `space` for pause/resume
+- ✅ **Color-coded sections** - Beautiful formatting
+- ✅ **Responsive layout** - Adapts to terminal size
+- ✅ **Mouse support** - Interactive elements
+- ✅ **Graceful fallback** - Works without prompt_toolkit
 
 ## More Information
 

@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-STAR Coach - Standalone version
-A CLI tool for practicing STAR interview answers with timed sections.
-This version uses only standard library modules for maximum compatibility.
+STAR Coach - Enhanced CLI tool for practicing STAR interview answers with timed sections.
+Uses prompt_toolkit for rich interactive experience.
 """
 
 import argparse
@@ -11,6 +10,22 @@ import sys
 import time
 from pathlib import Path
 from typing import List, Optional
+
+try:
+    from prompt_toolkit import Application
+    from prompt_toolkit.layout import Layout, HSplit, Window, ScrollablePane
+    from prompt_toolkit.layout.controls import FormattedTextControl
+    from prompt_toolkit.layout.containers import FloatContainer, Float
+    from prompt_toolkit.key_binding import KeyBindings
+    from prompt_toolkit.formatted_text import HTML, FormattedText
+    from prompt_toolkit.widgets import ProgressBar, Label, Button
+    from prompt_toolkit.styles import Style
+    from prompt_toolkit.layout.dimension import D
+    PROMPT_TOOLKIT_AVAILABLE = True
+except ImportError:
+    PROMPT_TOOLKIT_AVAILABLE = False
+    print("Warning: prompt_toolkit not available. Falling back to basic interface.")
+    print("Install with: pip install prompt_toolkit")
 
 
 class STARSection:
@@ -102,15 +117,155 @@ def parse_star_file(file_path: Optional[Path]) -> List[STARSection]:
     return sections
 
 
-def print_banner():
-    """Print the application banner."""
-    print("🌟 STAR Coach - Interview Practice Tool")
-    print("Get ready to practice your STAR answers!\n")
+def create_progress_bar_app(section: STARSection, section_num: int, total_sections: int):
+    """Create a prompt_toolkit application with progress bar."""
+    
+    # Create key bindings
+    kb = KeyBindings()
+    
+    # Progress tracking
+    progress = [0]  # Use list to allow modification in nested functions
+    
+    def update_progress():
+        if progress[0] < section.time_seconds:
+            progress[0] += 1
+            return True
+        return False
+    
+    @kb.add('q')
+    def quit_app(event):
+        """Quit the application."""
+        event.app.exit()
+    
+    @kb.add('space')
+    def pause_resume(event):
+        """Pause/resume the timer."""
+        # This could be enhanced with pause functionality
+        pass
+    
+    # Create progress bar
+    progress_bar = ProgressBar()
+    
+    # Create content display
+    content_text = section.content if section.content else f"[No content provided for {section.name}]"
+    content_display = FormattedTextControl(
+        HTML(f"""
+<ansiblue>📋 {section.name.upper()}</ansiblue>
+
+<ansiyellow>Content:</ansiyellow>
+{content_text}
+
+<ansigreen>⏱️  Time: {section.time_minutes} minute{'s' if section.time_minutes != 1 else ''}</ansigreen>
+        """)
+    )
+    
+    # Create status display
+    status_display = FormattedTextControl(
+        HTML(f"<ansicyan>Section {section_num} of {total_sections}</ansicyan>")
+    )
+    
+    # Create instructions
+    instructions = FormattedTextControl(
+        HTML("<ansiyellow>Press 'q' to quit, 'space' to pause/resume</ansiyellow>")
+    )
+    
+    # Layout
+    root_container = FloatContainer(
+        content=HSplit([
+            Window(content=status_display, height=1),
+            Window(height=1),  # Spacer
+            Window(content=content_display, height=D(min=10)),
+            Window(height=1),  # Spacer
+            Window(content=progress_bar, height=3),
+            Window(height=1),  # Spacer
+            Window(content=instructions, height=1),
+        ]),
+        floats=[
+            Float(
+                content=Window(
+                    content=FormattedTextControl(
+                        HTML(f"<ansired>Practice {section.name}...</ansired>")
+                    ),
+                    height=1
+                ),
+                top=0,
+                right=0,
+            )
+        ]
+    )
+    
+    layout = Layout(root_container)
+    
+    # Style
+    style = Style.from_dict({
+        'progress-bar': 'bg:#ansiblue #ansiwhite',
+        'progress-bar.used': 'bg:#ansigreen',
+    })
+    
+    # Create application
+    app = Application(
+        layout=layout,
+        key_bindings=kb,
+        style=style,
+        full_screen=True,
+        mouse_support=True,
+    )
+    
+    # Start timer
+    def run_timer():
+        while progress[0] < section.time_seconds:
+            time.sleep(1)
+            update_progress()
+            # Update progress bar
+            progress_bar.percentage = (progress[0] / section.time_seconds) * 100
+            app.invalidate()
+        app.exit()
+    
+    import threading
+    timer_thread = threading.Thread(target=run_timer)
+    timer_thread.daemon = True
+    timer_thread.start()
+    
+    return app
 
 
-def print_section_header(section: STARSection, section_num: int, total_sections: int):
-    """Print a section header."""
-    print(f"Section {section_num} of {total_sections}")
+def display_section_enhanced(section: STARSection, section_num: int, total_sections: int) -> None:
+    """
+    Display a STAR section with enhanced prompt_toolkit interface.
+    
+    Args:
+        section: The STAR section to display
+        section_num: Current section number
+        total_sections: Total number of sections
+    """
+    if not PROMPT_TOOLKIT_AVAILABLE:
+        # Fallback to basic display
+        display_section_basic(section, section_num, total_sections)
+        return
+    
+    try:
+        app = create_progress_bar_app(section, section_num, total_sections)
+        app.run()
+        
+        # Show completion message
+        print(f"\n✅ {section.name} section complete!")
+        
+    except Exception as e:
+        print(f"Error with enhanced display: {e}")
+        # Fallback to basic display
+        display_section_basic(section, section_num, total_sections)
+
+
+def display_section_basic(section: STARSection, section_num: int, total_sections: int) -> None:
+    """
+    Basic display fallback when prompt_toolkit is not available.
+    
+    Args:
+        section: The STAR section to display
+        section_num: Current section number
+        total_sections: Total number of sections
+    """
+    print(f"\nSection {section_num} of {total_sections}")
     print(f"📋 {section.name.upper()}")
     
     if section.content:
@@ -122,23 +277,7 @@ def print_section_header(section: STARSection, section_num: int, total_sections:
     
     print(f"\n⏱️  Time: {section.time_minutes} minute{'s' if section.time_minutes != 1 else ''}")
     print()
-
-
-def progress_bar(current: int, total: int, width: int = 50) -> str:
-    """Create a simple progress bar."""
-    filled = int(width * current / total)
-    bar = "█" * filled + "░" * (width - filled)
-    percentage = int(100 * current / total)
-    return f"[{bar}] {percentage}%"
-
-
-def display_section(section: STARSection) -> None:
-    """
-    Display a STAR section with content and progress bar.
     
-    Args:
-        section: The STAR section to display
-    """
     print(f"Practice {section.name}...")
     
     # Create progress bar
@@ -148,13 +287,31 @@ def display_section(section: STARSection) -> None:
         seconds = remaining % 60
         
         # Clear line and show progress
-        print(f"\r{progress_bar(i, section.time_seconds)} ⏱️ {minutes:02d}:{seconds:02d} remaining", end="", flush=True)
+        print(f"\r{progress_bar_basic(i, section.time_seconds)} ⏱️ {minutes:02d}:{seconds:02d} remaining", end="", flush=True)
         
         if i < section.time_seconds:
             time.sleep(1)
     
     print()  # New line after progress
     print(f"✅ {section.name} section complete!")
+
+
+def progress_bar_basic(current: int, total: int, width: int = 50) -> str:
+    """Create a simple progress bar for fallback."""
+    filled = int(width * current / total)
+    bar = "█" * filled + "░" * (width - filled)
+    percentage = int(100 * current / total)
+    return f"[{bar}] {percentage}%"
+
+
+def print_banner():
+    """Print the application banner."""
+    if PROMPT_TOOLKIT_AVAILABLE:
+        print("🌟 STAR Coach - Enhanced Interview Practice Tool")
+        print("Get ready to practice your STAR answers with rich interface!\n")
+    else:
+        print("🌟 STAR Coach - Interview Practice Tool")
+        print("Get ready to practice your STAR answers!\n")
 
 
 def main():
@@ -167,8 +324,18 @@ def main():
         type=Path,
         help="Path to .org or .txt file with STAR content"
     )
+    parser.add_argument(
+        "--basic", "-b",
+        action="store_true",
+        help="Use basic interface (disable prompt_toolkit)"
+    )
     
     args = parser.parse_args()
+    
+    # Force basic mode if requested
+    if args.basic:
+        global PROMPT_TOOLKIT_AVAILABLE
+        PROMPT_TOOLKIT_AVAILABLE = False
     
     try:
         print_banner()
@@ -181,16 +348,25 @@ def main():
         else:
             print("📝 No file provided - practicing with empty sections")
         
-        print(f"📊 Found {len(sections)} sections to practice\n")
+        print(f"📊 Found {len(sections)} sections to practice")
+        
+        if PROMPT_TOOLKIT_AVAILABLE:
+            print("🎨 Using enhanced interface with prompt_toolkit")
+        else:
+            print("📱 Using basic interface")
+        
+        print()
         
         # Practice each section
         for i, section in enumerate(sections, 1):
-            print_section_header(section, i, len(sections))
-            display_section(section)
+            display_section_enhanced(section, i, len(sections))
             
             if i < len(sections):
-                print("\nPress Enter to continue to the next section...")
-                input()
+                if PROMPT_TOOLKIT_AVAILABLE:
+                    input("\nPress Enter to continue to the next section...")
+                else:
+                    print("\nPress Enter to continue to the next section...")
+                    input()
         
         print("\n🎉 Congratulations! You've completed your STAR practice session!")
         print("Great job practicing your interview skills!")

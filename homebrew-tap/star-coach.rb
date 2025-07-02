@@ -9,6 +9,9 @@ class StarCoach < Formula
   depends_on "python@3.8"
   
   def install
+    # Install prompt_toolkit for enhanced interface
+    system "python3", "-m", "pip", "install", "prompt_toolkit>=3.0.0"
+    
     # Install the standalone script
     bin.install "star_coach_standalone.py" => "star-coach"
     
@@ -27,7 +30,7 @@ class StarCoach < Formula
       
       You can now use:
       
-      # Practice with default empty sections
+      # Practice with enhanced interface (default)
       star-coach
       
       # Practice with custom file
@@ -35,6 +38,9 @@ class StarCoach < Formula
       
       # Practice with the included example
       star-coach --file example_star.org
+      
+      # Force basic interface (no prompt_toolkit)
+      star-coach --basic
       
       For more information and examples, visit: #{homepage}
     EOS
