@@ -41,16 +41,13 @@ class STARSection:
 def parse_star_file(file_path: Optional[Path]) -> List[STARSection]:
     """
     Parse a .org or .txt file and extract STAR sections with timing.
-    
-    Args:
-        file_path: Path to the input file, or None for empty practice
-        
+    Also extract a 'pre prompt' section if present.
     Returns:
-        List of STARSection objects
+        (pre_prompt, List of STARSection objects)
     """
     if file_path is None:
         # Return empty sections with default times
-        return [
+        return None, [
             STARSection("Situation", "", 2),
             STARSection("Task", "", 1),
             STARSection("Action", "", 2),
@@ -62,6 +59,7 @@ def parse_star_file(file_path: Optional[Path]) -> List[STARSection]:
     
     content = file_path.read_text()
     sections = []
+    pre_prompt = None
     
     # Default times for each section
     default_times = {
@@ -86,7 +84,10 @@ def parse_star_file(file_path: Optional[Path]) -> List[STARSection]:
             if current_section:
                 section_name = current_section.lower().strip()
                 time_minutes = default_times.get(section_name, 2)
-                sections.append(STARSection(current_section, '\n'.join(current_content), time_minutes))
+                if section_name == "pre prompt":
+                    pre_prompt = '\n'.join(current_content).strip()
+                else:
+                    sections.append(STARSection(current_section, '\n'.join(current_content), time_minutes))
             
             # Start new section
             current_section = match.group(1).strip()
@@ -103,7 +104,10 @@ def parse_star_file(file_path: Optional[Path]) -> List[STARSection]:
     if current_section:
         section_name = current_section.lower().strip()
         time_minutes = default_times.get(section_name, 2)
-        sections.append(STARSection(current_section, '\n'.join(current_content), time_minutes))
+        if section_name == "pre prompt":
+            pre_prompt = '\n'.join(current_content).strip()
+        else:
+            sections.append(STARSection(current_section, '\n'.join(current_content), time_minutes))
     
     # If no sections found, create default ones
     if not sections:
@@ -114,10 +118,10 @@ def parse_star_file(file_path: Optional[Path]) -> List[STARSection]:
             STARSection("Result", "", default_times["result"]),
         ]
     
-    return sections
+    return pre_prompt, sections
 
 
-def create_progress_bar_app(section: STARSection, section_num: int, total_sections: int):
+def create_progress_bar_app(section: STARSection, section_num: int, total_sections: int, pre_prompt: str = None):
     """Create a prompt_toolkit application with progress bar and user controls."""
     
     # Create key bindings
@@ -194,14 +198,14 @@ def create_progress_bar_app(section: STARSection, section_num: int, total_sectio
     
     # Always show section title and time
     section_title_html = f"<ansiblue>📋 {section.name.upper()}</ansiblue>\n<ansigreen>⏱️  Time: {section.time_minutes} minute{'s' if section.time_minutes != 1 else ''}</ansigreen>"
+    pre_prompt_html = f"<ansimagenta>{pre_prompt}</ansimagenta>\n\n" if pre_prompt else ""
     if section.content:
         content_lines = section.content.splitlines()
-        content_html = f"{section_title_html}\n<ansiyellow>Content:</ansiyellow>\n{section.content}"
-        # 2 for title/time, 1 for 'Content:', plus all content lines
-        content_height = D.exact(2 + 1 + len(content_lines))
+        content_html = f"{pre_prompt_html}{section_title_html}\n<ansiyellow>Content:</ansiyellow>\n{section.content}"
+        content_height = D.exact((pre_prompt.count('\n') if pre_prompt else 0) + 3 + 1 + len(content_lines))
     else:
-        content_html = section_title_html
-        content_height = D.exact(2)
+        content_html = f"{pre_prompt_html}{section_title_html}"
+        content_height = D.exact((pre_prompt.count('\n') if pre_prompt else 0) + 3)
     content_display = FormattedTextControl(HTML(content_html))
     
     # Create controls display
@@ -275,32 +279,32 @@ def create_progress_bar_app(section: STARSection, section_num: int, total_sectio
     return app, quit_section, restart_section, quit_app
 
 
-def display_section_enhanced(section: STARSection, section_num: int, total_sections: int) -> tuple[bool, bool, bool]:
+def display_section_enhanced(section: STARSection, section_num: int, total_sections: int, pre_prompt: str = None) -> tuple[bool, bool, bool]:
     """
     Display a STAR section with enhanced prompt_toolkit interface.
-    
     Args:
         section: The STAR section to display
         section_num: Current section number
         total_sections: Total number of sections
-        
+        pre_prompt: Optional pre-prompt text to display at the top
     Returns:
         tuple: (quit_section, restart_section, quit_app)
     """
     if not PROMPT_TOOLKIT_AVAILABLE:
-        # Fallback to basic display
         display_section_basic(section, section_num, total_sections)
         return False, False, False
-    
     try:
-        app, quit_section, restart_section, quit_app = create_progress_bar_app(section, section_num, total_sections)
-        app.run()
-        
-        # Check if section was quit or restarted
+        app, quit_section, restart_section, quit_app = create_progress_bar_app(section, section_num, total_sections, pre_prompt=pre_prompt)
+        try:
+            app.run()
+        except Exception as e:
+            if e.__class__.__name__ == "NotEnoughSpaceError":
+                pass
+            else:
+                raise
         was_quit = quit_section[0]
         was_restart = restart_section[0]
         was_app_quit = quit_app[0]
-        
         if was_app_quit:
             print(f"\n👋 Application quit by user!")
             return False, False, True
@@ -308,16 +312,12 @@ def display_section_enhanced(section: STARSection, section_num: int, total_secti
             print(f"\n⏭️  {section.name} section skipped!")
         elif was_restart:
             print(f"\n🔄 {section.name} section restarted!")
-            # Recursively restart the section
-            return display_section_enhanced(section, section_num, total_sections)
+            return display_section_enhanced(section, section_num, total_sections, pre_prompt=pre_prompt)
         else:
             print(f"\n✅ {section.name} section complete!")
-        
         return was_quit, was_restart, was_app_quit
-        
     except Exception as e:
         print(f"Error with enhanced display: {e}")
-        # Fallback to basic display
         display_section_basic(section, section_num, total_sections)
         return False, False, False
 
@@ -410,7 +410,7 @@ def main():
     
     try:
         # Parse the file
-        sections = parse_star_file(args.file)
+        pre_prompt, sections = parse_star_file(args.file)
         
         if args.file:
             file_msg = f"📁 Loaded content from: {args.file}"
@@ -431,8 +431,9 @@ def main():
                 print(file_msg)
                 print(section_count_msg)
                 print(interface_msg)
-                print()
-                quit_section, restart_section, quit_app = display_section_enhanced(section, i, len(sections))
+                if pre_prompt:
+                    print(pre_prompt + "\n")
+                quit_section, restart_section, quit_app = display_section_enhanced(section, i, len(sections), pre_prompt=pre_prompt)
                 
                 # If app was quit, exit the loop
                 if quit_app:

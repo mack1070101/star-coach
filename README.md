@@ -88,30 +88,32 @@ When `prompt_toolkit` is available, you get:
 
 STAR Coach reads `.org` or `.txt` files with the following format:
 
-```org
-* Situation: 3m
+```
+* Pre Prompt
+This text will appear at the top of every section. Use it for reminders, tips, or a motivational message!
 
+* Situation: 3m
 - I was working on a project with tight deadlines
 - The team was struggling with coordination
 
 * Task: 2m
-
 - I needed to coordinate with multiple teams
 - Create a timeline and ensure delivery
 
 * Action: 4m
-
 - I created a detailed timeline and held daily standups
 - Implemented tracking tools and communication channels
 
 * Result: 1m
-
 - We delivered the project on time and under budget
 - Team efficiency improved by 40%
 ```
 
-### Timing Format
+### Pre Prompt Section
+- If your file contains a section titled `* Pre Prompt`, its content will be displayed at the top of every STAR section (Situation, Task, Action, Result).
+- This is useful for reminders, interview tips, or any message you want to see throughout your session.
 
+### Timing Format
 - **With timing**: `* SectionName: 3m` (3 minutes)
 - **Without timing**: `* SectionName` (uses defaults)
 - **Default times**: Situation (2m), Task (1m), Action (2m), Result (1m)
