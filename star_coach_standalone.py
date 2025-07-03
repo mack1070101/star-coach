@@ -193,18 +193,12 @@ def create_progress_bar_app(section: STARSection, section_num: int, total_sectio
     progress_display = FormattedTextControl(HTML(f"<ansigreen>{get_progress_text()}</ansigreen>"))
     
     # Always show section title and time
-    section_title_html = f"""
-<ansiblue>📋 {section.name.upper()}</ansiblue>
-<ansigreen>⏱️  Time: {section.time_minutes} minute{'s' if section.time_minutes != 1 else ''}</ansigreen>
-    """
+    section_title_html = f"<ansiblue>📋 {section.name.upper()}</ansiblue>\n<ansigreen>⏱️  Time: {section.time_minutes} minute{'s' if section.time_minutes != 1 else ''}</ansigreen>"
     if section.content:
-        content_html = f"""
-{section_title_html}
-
-<ansiyellow>Content:</ansiyellow>
-{section.content}
-        """
-        content_height = D(min=8, weight=1)
+        content_lines = section.content.splitlines()
+        content_html = f"{section_title_html}\n<ansiyellow>Content:</ansiyellow>\n{section.content}"
+        # 2 for title/time, 1 for 'Content:', plus all content lines
+        content_height = D.exact(2 + 1 + len(content_lines))
     else:
         content_html = section_title_html
         content_height = D.exact(2)
@@ -221,16 +215,12 @@ def create_progress_bar_app(section: STARSection, section_num: int, total_sectio
     
     controls_display = FormattedTextControl(HTML(get_controls_text()))
     
-    # Layout with dynamic sizing, no status line
+    # Layout: no vertical spacers above or below the progress bar
     root_container = FloatContainer(
         content=HSplit([
-            # Window(content=status_display, height=1),  # Removed status line
-            # Window(height=1),  # Removed spacer for status
-            Window(content=content_display, height=content_height),  # Dynamic height
-            Window(height=1),  # Spacer
+            Window(content=content_display, height=content_height),
             Window(content=progress_display, height=3),
-            Window(height=1),  # Spacer
-            Window(content=controls_display, height=D(min=6, weight=1)),  # Dynamic height
+            Window(content=controls_display, height=D(min=6, weight=1)),
         ]),
         floats=[
             Float(
@@ -386,19 +376,14 @@ def progress_bar_basic(current: int, total: int, width: int = 50) -> str:
 
 
 def print_banner():
-    """Print the application banner."""
-    if PROMPT_TOOLKIT_AVAILABLE:
-        print("🌟 STAR Coach - Enhanced Interview Practice Tool")
-        print("Get ready to practice your STAR answers with rich interface and controls!\n")
-    else:
-        print("🌟 STAR Coach - Interview Practice Tool")
-        print("Get ready to practice your STAR answers!\n")
+    print("🌟 STAR Coach - Interview Timer")
+    print("Get ready to manage your STAR answers with a focused, timed interface!\n")
 
 
 def main():
     """Main CLI function."""
     parser = argparse.ArgumentParser(
-        description="STAR Coach - Practice your STAR interview answers with timed sections."
+        description="STAR Coach - Interview timer for managing your STAR answers with timed sections."
     )
     parser.add_argument(
         "--file", "-f",
@@ -410,6 +395,11 @@ def main():
         action="store_true",
         help="Use basic interface (disable prompt_toolkit)"
     )
+    parser.add_argument(
+        "--repeat", "-r",
+        action="store_true",
+        help="Repeat STAR sections in a loop until you quit"
+    )
     
     args = parser.parse_args()
     
@@ -419,51 +409,62 @@ def main():
         PROMPT_TOOLKIT_AVAILABLE = False
     
     try:
-        print_banner()
-        
         # Parse the file
         sections = parse_star_file(args.file)
         
         if args.file:
-            print(f"📁 Loaded content from: {args.file}")
+            file_msg = f"📁 Loaded content from: {args.file}"
         else:
-            print("📝 No file provided - practicing with empty sections")
+            file_msg = "📝 No file provided - using default STAR sections"
         
-        print(f"📊 Found {len(sections)} sections to practice")
+        section_count_msg = f"📊 {len(sections)} sections to time your answers"
         
         if PROMPT_TOOLKIT_AVAILABLE:
-            print("🎨 Using enhanced interface with prompt_toolkit and user controls")
+            interface_msg = "🎨 Using enhanced interface with prompt_toolkit and answer management controls"
         else:
-            print("📱 Using basic interface")
+            interface_msg = "📱 Using basic interface"
         
-        print()
+        # Timer for each section, with repeat mode
+        def timer_once():
+            for i, section in enumerate(sections, 1):
+                print_banner()
+                print(file_msg)
+                print(section_count_msg)
+                print(interface_msg)
+                print()
+                quit_section, restart_section, quit_app = display_section_enhanced(section, i, len(sections))
+                
+                # If app was quit, exit the loop
+                if quit_app:
+                    return True
+                
+                # If section was quit, skip to next
+                if quit_section:
+                    continue
+                
+                # If section was restarted, don't advance to next section
+                if restart_section:
+                    i -= 1  # Stay on current section
+                    continue
+                
+                if i < len(sections):
+                    if PROMPT_TOOLKIT_AVAILABLE:
+                        input("\nPress Enter to continue to the next section...")
+                    else:
+                        print("\nPress Enter to continue to the next section...")
+                        input()
+            return False
         
-        # Practice each section
-        for i, section in enumerate(sections, 1):
-            quit_section, restart_section, quit_app = display_section_enhanced(section, i, len(sections))
-            
-            # If app was quit, exit the loop
-            if quit_app:
-                break
-            
-            # If section was quit, skip to next
-            if quit_section:
-                continue
-            
-            # If section was restarted, don't advance to next section
-            if restart_section:
-                i -= 1  # Stay on current section
-                continue
-            
-            if i < len(sections):
-                if PROMPT_TOOLKIT_AVAILABLE:
-                    input("\nPress Enter to continue to the next section...")
-                else:
-                    print("\nPress Enter to continue to the next section...")
-                    input()
-        
-        print("\n🎉 Congratulations! You've completed your STAR practice session!")
-        print("Great job practicing your interview skills!")
+        if args.repeat:
+            while True:
+                quit_now = timer_once()
+                if quit_now:
+                    break
+            print("\n👋 Exited repeat mode. Interview timer stopped.")
+        else:
+            timer_once()
+            print("\n⏰ All sections complete! Interview timer finished.")
+            print("You managed your STAR answers with precision!")
         
     except Exception as e:
         print(f"❌ Error: {e}", file=sys.stderr)

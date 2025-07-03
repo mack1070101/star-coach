@@ -1,5 +1,5 @@
+Blah blah blah and stuff
 * Situation: 3m
-
 - I was working as a software engineer at a startup that was rapidly growing
 - Our team was responsible for maintaining a critical customer-facing application
 - We were experiencing frequent outages and performance issues
@@ -36,4 +36,4 @@
 - We were able to handle 3x more traffic without performance degradation
 - The CEO publicly recognized our team's efforts in the company all-hands
 - We established a culture of proactive monitoring and performance optimization
-- The playbook I created became a template for other teams in the company 
+- The playbook I created became a template for other teams in the company
