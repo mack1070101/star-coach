@@ -1,5 +1,0 @@
-homebrew-tap
-path
-star_coach
-venv
-venv-fresh
