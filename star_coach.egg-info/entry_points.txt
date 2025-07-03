@@ -1,0 +1,2 @@
+[console_scripts]
+star-coach = star_coach.cli:main

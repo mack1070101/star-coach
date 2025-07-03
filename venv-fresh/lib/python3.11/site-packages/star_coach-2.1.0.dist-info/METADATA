@@ -1,3 +1,34 @@
+Metadata-Version: 2.4
+Name: star-coach
+Version: 2.1.0
+Summary: STAR Coach - Interview timer for managing your STAR answers with timed sections
+Author-email: Mackenzie Bligh <mackenziebligh@gmail.com>
+Maintainer-email: Mackenzie Bligh <mackenziebligh@gmail.com>
+License: MIT
+Project-URL: Homepage, https://github.com/mack1070101/story-star
+Project-URL: Repository, https://github.com/mack1070101/story-star
+Project-URL: Issues, https://github.com/mack1070101/story-star/issues
+Keywords: interview,star,timer,cli,practice
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Utilities
+Classifier: Topic :: Office/Business
+Requires-Python: >=3.8
+Description-Content-Type: text/markdown
+Requires-Dist: prompt_toolkit>=3.0.0
+Provides-Extra: dev
+Requires-Dist: pytest>=7.0.0; extra == "dev"
+Requires-Dist: black>=22.0.0; extra == "dev"
+Requires-Dist: flake8>=4.0.0; extra == "dev"
+
 # 🌟 STAR Coach
 
 A CLI tool that helps job candidates practice giving STAR answers (Situation, Task, Action, Result) for interviews with timed sections and beautiful progress bars.
@@ -16,21 +47,16 @@ A CLI tool that helps job candidates practice giving STAR answers (Situation, Ta
 
 ### Installation
 
-**Option 1: pip from GitHub (Recommended)**
-```bash
-pip install git+https://github.com/mack1070101/story-star.git
-```
-
-**Option 2: Homebrew (macOS)**
+**Option 1: Homebrew (macOS) - Enhanced Version**
 ```bash
 brew tap mack1070101/star-coach
 brew install star-coach
 ```
 
-**Option 3: Direct Download**
+**Option 2: Direct Download - Enhanced Version**
 ```bash
 # Download the standalone script
-curl -O https://raw.githubusercontent.com/mack1070101/story-star/main/star_coach_standalone.py
+curl -O https://raw.githubusercontent.com/mack1070101/star-coach/main/star_coach_standalone.py
 
 # Install prompt_toolkit for enhanced interface
 pip install prompt_toolkit
@@ -39,17 +65,18 @@ pip install prompt_toolkit
 python star_coach_standalone.py
 ```
 
-**Option 4: Clone Repository**
+**Option 3: Clone Repository - Enhanced Version**
 ```bash
-git clone https://github.com/mack1070101/story-star.git
-cd story-star
-pip install -e .
+git clone https://github.com/mack1070101/star-coach.git
+cd star-coach
+pip install prompt_toolkit
+python star_coach_standalone.py
 ```
 
-**Option 5: Basic Version (No Dependencies)**
+**Option 4: Basic Version (No Dependencies)**
 ```bash
 # Download and run without prompt_toolkit
-curl -O https://raw.githubusercontent.com/mack1070101/story-star/main/star_coach_standalone.py
+curl -O https://raw.githubusercontent.com/mack1070101/star-coach/main/star_coach_standalone.py
 python star_coach_standalone.py --basic
 ```
 
@@ -127,50 +154,41 @@ This text will appear at the top of every section. Use it for reminders, tips, o
 ### Project Structure
 
 ```
-story-star/
-├── star_coach/              # Python package
-│   ├── __init__.py          # Package initialization
-│   ├── cli.py               # Main CLI application
-│   └── example_star.org     # Example STAR practice file
-├── star_coach_standalone.py # Standalone script (legacy)
-├── pyproject.toml           # Package configuration
-├── requirements.txt         # Dependencies
-├── README.md                # This file
-└── homebrew-tap/           # Homebrew distribution files
-    └── star-coach.rb       # Homebrew formula
+star-coach/
+├── star_coach_standalone.py  # Main CLI application (enhanced)
+├── example_star.org          # Example STAR practice file
+├── requirements.txt          # Dependencies for enhanced version
+├── README.md                 # This file
+└── homebrew-tap/            # Homebrew distribution files
+    └── star-coach.rb        # Homebrew formula
 ```
 
 ### Local Development
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/mack1070101/story-star.git
-   cd story-star
+   git clone https://github.com/mack1070101/star-coach.git
+   cd star-coach
    ```
 
-2. **Install in development mode:**
+2. **Install dependencies for enhanced version:**
    ```bash
-   pip install -e .
+   pip install prompt_toolkit
    ```
 
-3. **Run the CLI:**
+3. **Run the script:**
    ```bash
-   star-coach --help
+   python star_coach_standalone.py --help
    ```
 
 4. **Test with example file:**
    ```bash
-   star-coach --file star_coach/example_star.org
+   python star_coach_standalone.py --file example_star.org
    ```
 
 5. **Test basic version:**
    ```bash
-   star-coach --basic --file star_coach/example_star.org
-   ```
-
-6. **Run the standalone script directly:**
-   ```bash
-   python star_coach_standalone.py --help
+   python star_coach_standalone.py --basic --file example_star.org
    ```
 
 ## 📋 Example Session

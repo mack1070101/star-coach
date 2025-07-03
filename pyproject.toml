@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "star-coach"
+version = "2.1.0"
+description = "STAR Coach - Interview timer for managing your STAR answers with timed sections"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Mackenzie Bligh", email = "mackenziebligh@gmail.com"}
+]
+maintainers = [
+    {name = "Mackenzie Bligh", email = "mackenziebligh@gmail.com"}
+]
+keywords = ["interview", "star", "timer", "cli", "practice"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Utilities",
+    "Topic :: Office/Business",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "prompt_toolkit>=3.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/mack1070101/story-star"
+Repository = "https://github.com/mack1070101/story-star"
+Issues = "https://github.com/mack1070101/story-star/issues"
+
+[project.scripts]
+star-coach = "star_coach.cli:main"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=22.0.0",
+    "flake8>=4.0.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[tool.setuptools.package-data]
+star_coach = ["*.org", "*.txt"] 
