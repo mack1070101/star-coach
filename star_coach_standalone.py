@@ -132,6 +132,7 @@ def create_progress_bar_app(section: STARSection, section_num: int, total_sectio
     paused = [False]
     quit_section = [False]
     restart_section = [False]
+    restart_timer = [False]  # New: restart the entire timer
     quit_app = [False]
     
     def update_progress():
@@ -380,6 +381,33 @@ def print_banner():
     print("Get ready to manage your STAR answers with a focused, timed interface!\n")
 
 
+def press_any_key():
+    """Wait for user to press any key."""
+    try:
+        import msvcrt  # Windows
+        print("Press any key to continue...", end="", flush=True)
+        msvcrt.getch()
+        print()  # New line after key press
+    except ImportError:
+        try:
+            import tty
+            import termios
+            import sys
+            # Unix/Linux/macOS
+            print("Press any key to continue...", end="", flush=True)
+            fd = sys.stdin.fileno()
+            old_settings = termios.tcgetattr(fd)
+            try:
+                tty.setraw(sys.stdin.fileno())
+                sys.stdin.read(1)
+            finally:
+                termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+            print()  # New line after key press
+        except (ImportError, termios.error):
+            # Fallback to input() if termios not available
+            input("Press any key to continue...")
+
+
 def main():
     """Main CLI function."""
     parser = argparse.ArgumentParser(
@@ -450,10 +478,9 @@ def main():
                 
                 if i < len(sections):
                     if PROMPT_TOOLKIT_AVAILABLE:
-                        input("\nPress Enter to continue to the next section...")
+                        press_any_key()
                     else:
-                        print("\nPress Enter to continue to the next section...")
-                        input()
+                        press_any_key()
             return False
         
         if args.repeat:
